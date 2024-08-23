@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Summarizer</h1>
+    </header>
+    <main>
+        <section>
+            <section>
+                <button id="submit">Summarize</button>
+                <button id="mode">User</button>
+            </section>
+
+            <form action="POST" >
+                <label for="text" style="display: flex; flex-direction: column;">Text</label>
+                <textarea name="text" id="text" cols="100" rows="20"></textarea>
+            </form>
+
+            <form action="POST" >
+                <label for="file" style="display: flex; flex-direction: column;">File</label>
+                <input type="file" name="file" id="file"></input>
+            </form>
+
+            <form action="POST" >
+                <label for="url" style="display: flex; flex-direction: column;">URL</label>
+                <input type="url" name="url" id="url"></input>
+            </form>
+
+            <section>
+                <label for="summary" style="display: flex; flex-direction: column;"
+                >Summary</label>
+                <textarea name="summary" id="summary" cols="100" rows="20"></textarea>
+            </section>
+
+        </section>
+    </main>
+    <script src="./static/main.js"  ></script>
+</body>
+</html>
