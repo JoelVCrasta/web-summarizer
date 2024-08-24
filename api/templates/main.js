@@ -149,7 +149,13 @@ async function getSummary(requestText) {
     } else if (res.status === 500) {
       alert("Internal Server Error: Please try again later.")
       return null
+    } else if (res.status === 400) {
+      alert("Bad Request: Invalid input or mode.")
+      return null
     }
+
+    alert("Unknown Error: Please try again later.")
+    return
   } catch (error) {
     console.error("Error summarizing text:", error)
     alert("Network Error or Server is unreachable.")
