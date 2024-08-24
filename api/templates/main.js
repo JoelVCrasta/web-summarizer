@@ -135,7 +135,7 @@ async function getData(curTextMode) {
  */
 async function getSummary(requestText) {
   try {
-    const res = await axios.post("/summarize", requestText, {
+    const res = await axios.post("http://127.0.0.1:8000/summary", requestText, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -218,7 +218,7 @@ submitButton.addEventListener("click", async function () {
 
   // Display the summary or clear if no summary returned
   if (summary) {
-    outputText.innerHTML = summary
+    outputText.innerHTML = summary.summary
   } else {
     outputText.innerHTML = ""
   }
