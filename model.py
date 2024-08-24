@@ -1,5 +1,4 @@
 from transformers import BartTokenizer, BartForConditionalGeneration
-from utils.file_open import open_file, read_text_from_file
 from utils.scraper import get_scraped_data
 import torch
 import warnings
