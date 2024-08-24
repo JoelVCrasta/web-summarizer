@@ -160,13 +160,13 @@ async function getSummary(requestText) {
 // Event listener to switch between text, URL, and file input modes
 inputMode.addEventListener("click", function () {
   const modes = ["TEXT", "URL", "FILE"]
-  let currentMode = textMode.innerHTML
+  let currentMode = inputMode.innerHTML
 
   let index = modes.indexOf(currentMode) || 0
   let nextIndex = (index + 1) % modes.length
   curTextMode = nextIndex
 
-  textMode.innerHTML = modes[nextIndex]
+  inputMode.innerHTML = modes[nextIndex]
 
   changeContainerDisplay(nextIndex, containers, shown, hidden)
 })
