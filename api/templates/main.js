@@ -158,7 +158,7 @@ async function getSummary(requestText) {
 }
 
 // Event listener to switch between text, URL, and file input modes
-mode.addEventListener("click", function () {
+inputMode.addEventListener("click", function () {
   const modes = ["TEXT", "URL", "FILE"]
   let currentMode = textMode.innerHTML
 
@@ -169,6 +169,18 @@ mode.addEventListener("click", function () {
   textMode.innerHTML = modes[nextIndex]
 
   changeContainerDisplay(nextIndex, containers, shown, hidden)
+})
+
+// Event listener to switch between summary length modes
+lengthMode.addEventListener("click", function () {
+  const lengths = ["SHORT", "MEDIUM", "LONG"]
+  let currentLength = lengthMode.innerHTML
+
+  let index = lengths.indexOf(currentLength) || 0
+  let nextIndex = (index + 1) % lengths.length
+  curLengthMode = nextIndex
+
+  lengthMode.innerHTML = lengths[nextIndex]
 })
 
 // Event listener to submit the input to the server for summarization
@@ -190,6 +202,7 @@ submitButton.addEventListener("click", async function () {
     text: "",
     url: "",
     mode: curTextMode,
+    sumlen: curLengthMode,
   }
 
   if (curTextMode === 0 || curTextMode === 2) {
