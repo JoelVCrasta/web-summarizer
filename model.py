@@ -11,20 +11,22 @@ logger = logging.getLogger(__name__)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+MAX_TEXT_INPUT_LEN = 2000
+
 # Initialize tokenizer and model
 tokenizer = BartTokenizer.from_pretrained('facebook/bart-large-cnn')
 model = BartForConditionalGeneration.from_pretrained('facebook/bart-large-cnn').to(device)
 
 # -----------------------------------------------------------
 
-def gen_sum(text: str, sum_len: str = 'medium') -> str:
+def gen_sum(text: str, sumlen: int) -> str:
     try:
         # Get the length settings
-        settings = length_settings(sum_len)
+        settings = length_settings(sumlen)
 
         # Tokenize the input text
         inputs = tokenizer.encode(
-            "summarize: " + text, 
+            text, 
             return_tensors="pt", 
             max_length=1024, 
             truncation=True
@@ -50,35 +52,21 @@ def gen_sum(text: str, sum_len: str = 'medium') -> str:
     
 # -----------------------------------------------------------
 
-def length_settings(sum_len):
+def length_settings(sum_len: str) -> dict:
     length_settings = {
-        'short' :   {'max_length': 250, 'min_length': 100, 'length_penalty': 1.0},
-        'medium':   {'max_length': 500, 'min_length': 250, 'length_penalty': 1.0},
-        'long'  :   {'max_length': 1000, 'min_length': 500, 'length_penalty': 1.5}
+        0 :   {'max_length': 250, 'min_length': 100, 'length_penalty': 1.0},
+        1 :   {'max_length': 500, 'min_length': 250, 'length_penalty': 1.0},
+        2 :   {'max_length': 1000, 'min_length': 500, 'length_penalty': 1.5}
     }
-    settings = length_settings.get(sum_len)
 
-    return settings
+    return length_settings.get(sum_len, length_settings[1])
     
-def summary(mode: int, text: str = '', url: str = '', sum_len: str = 'medium') -> str:
-    if mode == 0:
-        summary = gen_sum(text, sum_len)
-        return summary
+def summary(mode: int, text: str = '', sumlen: int = 1) -> str:
+    if mode in [0, 2]:
+        return gen_sum(text, sumlen)
         
-    elif mode == 1: 
-        try:
-            file_path = open_file()
-            text = read_text_from_file(file_path)
-            summary = gen_sum(text, sum_len)
-
-            return summary
-        except Exception as e:
-            logger.error(f"An error occurred: {e}")
-            raise RuntimeError("An error occurred while generating the summary")
-    
-    elif mode == 2:
-        tags = ['h1', 'h2', 'h3', 'h4', 'p', 'ul', 'ol', 'li']
-        text = get_scraped_data(url, tags)
-        summary = gen_sum(text, sum_len)
-
-        return summary
+    elif mode == 1:
+        tags = ['p', 'ul', 'ol', 'li']  
+        text = get_scraped_data(text, tags)
+        text = text[:MAX_TEXT_INPUT_LEN]
+        return gen_sum(text, sumlen)
