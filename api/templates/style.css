@@ -52,15 +52,21 @@ body {
   border-radius: 5px;
 }
 
-.text-container,
-.file-container,
-.url-container {
-  display: none;
+.text-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
-/* Show the container when active */
-.container-active {
-  display: flex;
+.file-container {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+.url-container {
+  display: none;
   flex-direction: column;
   align-items: center;
   width: 100%;

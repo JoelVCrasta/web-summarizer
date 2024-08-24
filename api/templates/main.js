@@ -2,27 +2,40 @@ const mode = document.getElementById("mode")
 const userText = document.getElementById("text")
 const urlText = document.getElementById("url")
 const fileText = document.getElementById("file")
-
 const outputText = document.getElementById("summary")
 const submitButton = document.getElementById("submit")
 
-let curMode = 0
-
+// CSS Display Styles
 const containers = ["text-container", "url-container", "file-container"]
 const shown =
   "display: flex; flex-direction: column; align-items: center; width: 100%;"
 const hidden = "display: none;"
 
-/* setInitialDisplay(containers, shown, hidden)
+// Initialize current mode to 'Text'
+let curMode = 0
 
-// Set initial display styles
+// Initialize display styles based on the mode
+setInitialDisplay(containers, shown, hidden)
+
+/**
+ * Sets the initial display styles for the input containers based on the current mode.
+ * @param {Array} containers - Array of container element IDs.
+ * @param {String} shown - CSS style for visible container.
+ * @param {String} hidden - CSS style for hidden container.
+ */
 function setInitialDisplay(containers, shown, hidden) {
   containers.forEach((id, index) => {
     document.getElementById(id).style.cssText = index === 0 ? shown : hidden
   })
-} */
+}
 
-// Change the display of the containers
+/**
+ * Changes the display of containers when the mode is switched.
+ * @param {Number} nextIndex - Index of the next container to be shown.
+ * @param {Array} containers - Array of container element IDs.
+ * @param {String} shown - CSS style for visible container.
+ * @param {String} hidden - CSS style for hidden container.
+ */
 function changeContainerDisplay(nextIndex, containers, shown, hidden) {
   containers.forEach((id, index) => {
     document.getElementById(id).style.cssText =
@@ -30,75 +43,117 @@ function changeContainerDisplay(nextIndex, containers, shown, hidden) {
   })
 }
 
+/**
+ * Reads the content of a PDF file and returns the extracted text.
+ * @param {File} file - The PDF file to read.
+ * @returns {Promise<String>} The text content extracted from the PDF.
+ */
 async function getPdfContent(file) {
   const fileReader = new FileReader()
 
-  return new Promise((resolve, reject) => {
-    fileReader.onload = async (event) => {
-      const typedArray = new Uint8Array(event.target.result)
-
-      try {
-        const pdf = await pdfjsLib.getDocument(typedArray).promise
-        let pdfContent = ""
-
-        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-          const page = await pdf.getPage(pageNum)
-          const text = await page.getTextContent()
-
-          pdfContent += text.items.map((item) => item.str).join(" ")
-        }
-
-        resolve(pdfContent)
-      } catch (error) {
-        reject(error)
-      }
+  // Read the file as an array buffer
+  const arrayBuffer = await new Promise((resolve, reject) => {
+    fileReader.onload = () => {
+      resolve(fileReader.result)
     }
-
-    fileReader.onerror = (error) => reject(error)
-
+    fileReader.onerror = reject
     fileReader.readAsArrayBuffer(file)
   })
+
+  // Convert ArrayBuffer to Uint8Array
+  const typedArray = new Uint8Array(arrayBuffer)
+
+  try {
+    // Get the PDF document
+    const pdf = await pdfjsLib.getDocument(typedArray).promise
+    let pdfContent = ""
+
+    // Extract text from each page of the PDF
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum)
+      const content = await page.getTextContent()
+      pdfContent += content.items.map((item) => item.str).join(" ")
+    }
+
+    return pdfContent
+  } catch (error) {
+    console.error(error)
+    throw new Error("Error reading PDF file")
+  }
 }
 
+/**
+ * Validates user input based on the current mode and returns the input if valid.
+ * @param {Number} curMode - The current mode of input (0: Text, 1: URL, 2: File).
+ * @returns {Promise<String|null>} The validated input text, URL, or PDF content.
+ */
 async function getData(curMode) {
   if (curMode === 0) {
     if (userText.value === "") {
-      alert("Please enter some text")
-      return
+      alert("No Text Entered")
+      return null
     }
     return userText.value
   } else if (curMode === 1) {
     if (urlText.value === "") {
-      alert("Please enter a url")
-      return
+      alert("No URL Entered")
+      return null
     }
-    // check if url is valid
+
     try {
-      new URL(urlText.value)
+      new URL(urlText.value) // Validate URL format
     } catch (error) {
-      alert("Please enter a valid url")
-      return
+      alert("Invalid URL")
+      return null
     }
 
     return urlText.value
   } else if (curMode === 2) {
-    // check if pdf or text file
-    if (fileText.files[0]) {
-      const file = fileText.files[0]
+    const file = fileText.files[0]
+    if (file) {
       if (file.type === "application/pdf") {
         return await getPdfContent(file)
       } else {
-        alert("Please upload a pdf file")
-        return // if not pdf
+        alert("No File Uploaded or Invalid File Type")
+        return null
       }
     }
   } else {
     alert("Something went wrong")
-    return
+    return null
   }
 }
 
-// Cycle through the modes
+/**
+ * Sends a POST request to the server to get a summary of the provided text or URL.
+ * @param {Object} requestText - The text, URL, and mode to send in the request.
+ * @returns {Promise<Object|null>} The summary response from the server, or null if an error occurred.
+ */
+async function getSummary(requestText) {
+  try {
+    const res = await axios.post("/summarize", requestText, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+
+    if (res.status === 200 && res.data) {
+      return res.data
+    } else if (res.status === 422) {
+      alert("Summarization failed: Unable to process the text.")
+      return null
+    } else if (res.status === 500) {
+      alert("Internal Server Error: Please try again later.")
+      return null
+    }
+  } catch (error) {
+    console.error("Error summarizing text:", error)
+    alert("Network Error or Server is unreachable.")
+    return null
+  }
+}
+
+// Event listener to switch between text, URL, and file input modes
 mode.addEventListener("click", function () {
   const modes = ["TEXT", "URL", "FILE"]
   let currentMode = mode.innerHTML
@@ -107,30 +162,47 @@ mode.addEventListener("click", function () {
   let nextIndex = (index + 1) % modes.length
   curMode = nextIndex
 
-  console.log(curMode)
-
   mode.innerHTML = modes[nextIndex]
 
   changeContainerDisplay(nextIndex, containers, shown, hidden)
 })
 
-// Submit the text to the server
+// Event listener to submit the input to the server for summarization
 submitButton.addEventListener("click", async function () {
-  const text = await getData(curMode)
+  const resultText = await getData(curMode)
 
-  console.log(text)
-  console.log(text.length)
-  /* axios  
-      .post("http://127.0.0.1:8000/summary", {
-        mode: curMode,
-        text: text,
-        url: url,
-        sum_len: "long",
-      })
-      .then(function (response) {
-        outputText.innerHTML = response.data
-      })
-      .catch(function (error) {
-        console.log(error)
-      }) */
+  if (!resultText) {
+    console.error("No text to summarize")
+    return
+  }
+
+  // Validate text length before sending to the server
+  if (resultText.length > 2000) {
+    alert("Content too long (max 2000 characters)")
+    return
+  }
+
+  let requestText = {
+    text: "",
+    url: "",
+    mode: curMode,
+  }
+
+  if (curMode === 0 || curMode === 2) {
+    requestText.text = resultText
+  } else if (curMode === 1) {
+    requestText.url = resultText
+  }
+
+  // Display loading message while awaiting summary
+  outputText.innerHTML = "Loading..."
+
+  const summary = await getSummary(requestText)
+
+  // Display the summary or clear if no summary returned
+  if (summary) {
+    outputText.innerHTML = summary
+  } else {
+    outputText.innerHTML = ""
+  }
 })
