@@ -1,4 +1,5 @@
-const mode = document.getElementById("mode")
+const inputMode = document.getElementById("mode")
+const lengthMode = document.getElementById("length")
 const userText = document.getElementById("text")
 const urlText = document.getElementById("url")
 const fileText = document.getElementById("file")
@@ -12,7 +13,10 @@ const shown =
 const hidden = "display: none;"
 
 // Initialize current mode to 'Text'
-let curMode = 0
+let curTextMode = 0
+
+// Summary Length Mode
+let curLengthMode = 0
 
 // Initialize display styles based on the mode
 setInitialDisplay(containers, shown, hidden)
@@ -84,17 +88,17 @@ async function getPdfContent(file) {
 
 /**
  * Validates user input based on the current mode and returns the input if valid.
- * @param {Number} curMode - The current mode of input (0: Text, 1: URL, 2: File).
+ * @param {Number} curTextMode - The current mode of input (0: Text, 1: URL, 2: File).
  * @returns {Promise<String|null>} The validated input text, URL, or PDF content.
  */
-async function getData(curMode) {
-  if (curMode === 0) {
+async function getData(curTextMode) {
+  if (curTextMode === 0) {
     if (userText.value === "") {
       alert("No Text Entered")
       return null
     }
     return userText.value
-  } else if (curMode === 1) {
+  } else if (curTextMode === 1) {
     if (urlText.value === "") {
       alert("No URL Entered")
       return null
@@ -108,7 +112,7 @@ async function getData(curMode) {
     }
 
     return urlText.value
-  } else if (curMode === 2) {
+  } else if (curTextMode === 2) {
     const file = fileText.files[0]
     if (file) {
       if (file.type === "application/pdf") {
@@ -156,20 +160,20 @@ async function getSummary(requestText) {
 // Event listener to switch between text, URL, and file input modes
 mode.addEventListener("click", function () {
   const modes = ["TEXT", "URL", "FILE"]
-  let currentMode = mode.innerHTML
+  let currentMode = textMode.innerHTML
 
   let index = modes.indexOf(currentMode) || 0
   let nextIndex = (index + 1) % modes.length
-  curMode = nextIndex
+  curTextMode = nextIndex
 
-  mode.innerHTML = modes[nextIndex]
+  textMode.innerHTML = modes[nextIndex]
 
   changeContainerDisplay(nextIndex, containers, shown, hidden)
 })
 
 // Event listener to submit the input to the server for summarization
 submitButton.addEventListener("click", async function () {
-  const resultText = await getData(curMode)
+  const resultText = await getData(curTextMode)
 
   if (!resultText) {
     console.error("No text to summarize")
@@ -185,12 +189,12 @@ submitButton.addEventListener("click", async function () {
   let requestText = {
     text: "",
     url: "",
-    mode: curMode,
+    mode: curTextMode,
   }
 
-  if (curMode === 0 || curMode === 2) {
+  if (curTextMode === 0 || curTextMode === 2) {
     requestText.text = resultText
-  } else if (curMode === 1) {
+  } else if (curTextMode === 1) {
     requestText.url = resultText
   }
 
