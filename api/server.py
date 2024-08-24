@@ -33,9 +33,9 @@ class SummaryRequest(BaseModel):
         sum_len (str): The length of the summary ('short', 'medium', 'long').
     """
     mode: int
-    text: str = ''
-    url: str = ''
-    sum_len: str = 'medium'
+    text: str
+    url: str
+    sumlen: int
 
 @app.get("/")
 async def root():
@@ -44,20 +44,22 @@ async def root():
 
 @app.post("/summary")
 async def get_summary(req: SummaryRequest):
+    toSummarize = ''
     try:
         if req.mode in [0, 2]:
             toSummarize = req.text
         elif req.mode == 1:
-            toSummarize = req.ur
+            toSummarize = req.url
         else:
             raise HTTPException(status_code=400, detail="Invalid mode specified")
 
         # Generate the summary
-        summary_text = summary(req.mode, toSummarize, req.sum_len)
+        summary_text = summary(req.mode, toSummarize, req.sumlen)
 
         if summary_text:
             return {"summary": summary_text}
         else:
             raise HTTPException(status_code=422, detail="An error occurred while generating the summary")
+        
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) 
