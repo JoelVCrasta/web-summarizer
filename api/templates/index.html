@@ -1,45 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-</head>
-<body>
-    <header>
-        <h1>Summarizer</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Summarizer</title>
+    <link rel="stylesheet" href="./static/style.css" />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js"
+      integrity="sha512-Z8CqofpIcnJN80feS2uccz+pXWgZzeKxDsDNMD/dJ6997/LSRY+W4NmEt9acwR+Gt9OHN0kkI1CTianCwoqcjQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.min.js"
+      integrity="sha512-lHibs5XrZL9hXP3Dhr/d2xJgPy91f2mhVAasrSbMkbmoTSm2Kz8DuSWszBLUg31v+BM6tSiHSqT72xwjaNvl0g=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+  </head>
+  <body>
+    <header class="header">
+      <h1>Summarizer</h1>
     </header>
+
     <main>
-        <section>
-            <section>
-                <button id="submit">Summarize</button>
-                <button id="mode">User</button>
-            </section>
+      <section class="btn-top">
+        <button class="btn" id="submit">SUMMARIZE</button>
+        <button class="btn" id="mode">TEXT</button>
+      </section>
 
-            <form action="POST" >
-                <label for="text" style="display: flex; flex-direction: column;">Text</label>
-                <textarea name="text" id="text" cols="100" rows="20"></textarea>
-            </form>
+      <section class="input-container">
+        <section class="input-form">
+          <form id="text-container" class="text-container active-container">
+            <label for="text">Text</label>
+            <textarea
+              name="text"
+              id="text"
+              class="textarea"
+              placeholder="Type your text here..."
+            ></textarea>
+          </form>
 
-            <form action="POST" >
-                <label for="file" style="display: flex; flex-direction: column;">File</label>
-                <input type="file" name="file" id="file"></input>
-            </form>
+          <form id="file-container" class="file-container active-container">
+            <label for="file">File</label>
+            <input type="file" name="file" id="file" />
+          </form>
 
-            <form action="POST" >
-                <label for="url" style="display: flex; flex-direction: column;">URL</label>
-                <input type="url" name="url" id="url"></input>
-            </form>
-
-            <section>
-                <label for="summary" style="display: flex; flex-direction: column;"
-                >Summary</label>
-                <textarea name="summary" id="summary" cols="100" rows="20"></textarea>
-            </section>
-
+          <form id="url-container" class="url-container active-container">
+            <label for="url">URL</label>
+            <input
+              type="url"
+              name="url"
+              id="url"
+              placeholder="Type your url here..."
+            />
+          </form>
         </section>
+
+        <section class="summary-container">
+          <label for="summary" style="display: flex; flex-direction: column"
+            >Summary</label
+          >
+          <textarea
+            name="summary"
+            id="summary"
+            class="textarea"
+            placeholder="Press summarize to get your summary..."
+          ></textarea>
+        </section>
+      </section>
     </main>
-    <script src="./static/main.js"  ></script>
-</body>
+    <script src="./static/main.js"></script>
+  </body>
 </html>

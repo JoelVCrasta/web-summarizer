@@ -3,4 +3,3 @@ uvicorn
 pydantic
 transformers
 torch
-tkinter
